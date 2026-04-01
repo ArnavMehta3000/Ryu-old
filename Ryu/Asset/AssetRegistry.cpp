@@ -10,7 +10,7 @@ namespace Ryu::Asset
 		, m_textureCache(gpuFactory)
 	{
 		RYU_PROFILE_SCOPE();
-		RegisterPrimitives();
+		LoadPrimitives();
 	}
 
 	MeshHandle AssetRegistry::GetPrimitive(PrimitiveType type) const
@@ -51,15 +51,15 @@ namespace Ryu::Asset
 		m_textureCache.InvalidateAll();
 	}
 
-	void AssetRegistry::RegisterPrimitives()
+	void AssetRegistry::LoadPrimitives()
 	{
 		RYU_PROFILE_SCOPE();
-		// Register all built-in primitives
-		m_primitives[static_cast<u64>(PrimitiveType::Triangle)] = m_meshCache.Register("Primitive:Triangle", Primitives::CreateTriangle());
-		m_primitives[static_cast<u64>(PrimitiveType::Cube)]     = m_meshCache.Register("Primitive:Cube", Primitives::CreateCube());
-		m_primitives[static_cast<u64>(PrimitiveType::Plane)]    = m_meshCache.Register("Primitive:Plane", Primitives::CreatePlane());
-		m_primitives[static_cast<u64>(PrimitiveType::Sphere)]   = m_meshCache.Register("Primitive:Sphere", Primitives::CreateSphere());
-		m_primitives[static_cast<u64>(PrimitiveType::Cylinder)] = m_meshCache.Register("Primitive:Cylinder", Primitives::CreateCylinder());
-		m_primitives[static_cast<u64>(PrimitiveType::Cone)]     = m_meshCache.Register("Primitive:Cone", Primitives::CreateCone());
+		// Load all built-in primitives
+		m_primitives[static_cast<u64>(PrimitiveType::Triangle)] = m_meshCache.Load("Primitive:Triangle", Primitives::CreateTriangle());
+		m_primitives[static_cast<u64>(PrimitiveType::Cube)]     = m_meshCache.Load("Primitive:Cube", Primitives::CreateCube());
+		m_primitives[static_cast<u64>(PrimitiveType::Plane)]    = m_meshCache.Load("Primitive:Plane", Primitives::CreatePlane());
+		m_primitives[static_cast<u64>(PrimitiveType::Sphere)]   = m_meshCache.Load("Primitive:Sphere", Primitives::CreateSphere());
+		m_primitives[static_cast<u64>(PrimitiveType::Cylinder)] = m_meshCache.Load("Primitive:Cylinder", Primitives::CreateCylinder());
+		m_primitives[static_cast<u64>(PrimitiveType::Cone)]     = m_meshCache.Load("Primitive:Cone", Primitives::CreateCone());
 	}
 }

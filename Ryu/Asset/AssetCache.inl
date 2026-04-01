@@ -5,12 +5,12 @@
 namespace Ryu::Asset
 {
 	template<typename TAssetData, typename TGpuResource>
-	inline AssetHandle<TAssetData> AssetCache<TAssetData, TGpuResource>::Register(const fs::path& path)
+	inline AssetHandle<TAssetData> AssetCache<TAssetData, TGpuResource>::Load(const fs::path& path)
 	{
 		RYU_PROFILE_SCOPE();
 		std::unique_lock lock(m_mutex);
 
-		// Check if already registered
+		// Check if already loaded
 		if (auto it = m_pathToId.find(path); it != m_pathToId.end())
 		{
 			return AssetHandle<TAssetData>{ it->second };
@@ -21,9 +21,21 @@ namespace Ryu::Asset
 		Entry entry
 		{
 			.SourcePath   = path,
-			.State        = AssetState::Unloaded,
+			.State        = AssetState::Loading,
 			.IsProcedural = false,
 		};
+
+		// Start loading CPU data immediately
+		entry.CpuData = LoadAsset<TAssetData>(path);
+		if (entry.CpuData)
+		{
+			entry.State = AssetState::Loaded;
+		}
+		else
+		{
+			RYU_LOG_ERROR("Failed to load asset from {}", path.string());
+			entry.State = AssetState::Failed;
+		}
 
 		m_entries[id] = std::move(entry);
 		m_pathToId[path] = id;
@@ -32,12 +44,12 @@ namespace Ryu::Asset
 	}
 
 	template<typename TAssetData, typename TGpuResource>
-	inline AssetHandle<TAssetData> AssetCache<TAssetData, TGpuResource>::Register(AssetId id, std::unique_ptr<TAssetData> data, std::string_view name)
+	inline AssetHandle<TAssetData> AssetCache<TAssetData, TGpuResource>::Load(AssetId id, std::unique_ptr<TAssetData> data, std::string_view name)
 	{
 		RYU_PROFILE_SCOPE();
 		std::unique_lock lock(m_mutex);
 
-		// Check if already registered
+		// Check if already loaded
 		if (m_entries.contains(id))
 		{
 			return AssetHandle<TAssetData>{ id };
@@ -46,7 +58,6 @@ namespace Ryu::Asset
 		Entry entry
 		{
 		   .CpuData      = std::move(data),
-		   //.SourcePath   = "",
 		   .Name         = name.data(),
 		   .State        = AssetState::Loaded,  // CPU data already provided
 		   .IsProcedural = true,
@@ -58,11 +69,11 @@ namespace Ryu::Asset
 	}
 
 	template<typename TAssetData, typename TGpuResource>
-	inline AssetHandle<TAssetData> AssetCache<TAssetData, TGpuResource>::Register(std::string_view name, std::unique_ptr<TAssetData> data)
+	inline AssetHandle<TAssetData> AssetCache<TAssetData, TGpuResource>::Load(std::string_view name, std::unique_ptr<TAssetData> data)
 	{
 		RYU_PROFILE_SCOPE();
 		const AssetId id = std::hash<std::string_view>{}(name);
-		return Register(id, std::move(data), name);
+		return Load(id, std::move(data), name);
 	}
 
 	template<typename TAssetData, typename TGpuResource>
@@ -71,7 +82,6 @@ namespace Ryu::Asset
 		RYU_PROFILE_SCOPE();
 		if (!handle.IsValid())
 		{
-			// Previously had a warning log here, but it polluted the log when mesh renderer component had no mesh on it
 			return nullptr;
 		}
 
@@ -82,7 +92,7 @@ namespace Ryu::Asset
 		{
 			return nullptr;
 		}
-		
+
 		const std::string name = entry->SourcePath.filename().string();
 
 		// Return if ready
@@ -91,19 +101,7 @@ namespace Ryu::Asset
 			return entry->GpuResource.get();
 		}
 
-		// Check we need to load the CPU side data first
-		if (entry->State == AssetState::Unloaded)
-		{
-			RYU_LOG_DEBUG("Loading CPU data for asset {}", name);
-			if (!LoadCpuData(*entry))
-			{
-				RYU_LOG_ERROR("Failed to load CPU data for asset {}", name);
-				entry->State = AssetState::Failed;
-				return nullptr;
-			}
-		}
-
-		// Create GPU resource if needed
+		// Create GPU resource if needed (lazy GPU creation)
 		if (entry->State == AssetState::Loaded && entry->CpuData)
 		{
 			RYU_LOG_DEBUG("Creating GPU resource for asset {}", name);
@@ -136,19 +134,6 @@ namespace Ryu::Asset
 			return nullptr;
 		}
 
-		// Load if needed
-		if (entry->State == AssetState::Unloaded)
-		{
-			RYU_LOG_DEBUG("Loading CPU data for asset {}", entry->SourcePath.filename().string());
-			
-			if (!LoadCpuData(*entry))
-			{
-				RYU_LOG_ERROR("Failed to load CPU data for asset {}", entry->SourcePath.filename().string());
-				entry->State = AssetState::Failed;
-				return nullptr;
-			}
-		}
-
 		return entry->CpuData.get();
 	}
 
@@ -161,10 +146,7 @@ namespace Ryu::Asset
 		if (!entry)
 			return;
 
-		if (entry->State == AssetState::Unloaded)
-		{
-			LoadCpuData(*entry);
-		}
+		// CPU data is already loaded in Load() method, nothing to do
 	}
 
 	template<typename TAssetData, typename TGpuResource>
@@ -176,17 +158,10 @@ namespace Ryu::Asset
 		if (!entry)
 			return;
 
-		// Ensure CPU data loaded first
-		if (entry->State == AssetState::Unloaded)
-		{
-			if (!LoadCpuData(*entry)) 
-				return;
-		}
-
 		// Create GPU resource if needed
-		if (entry->State == AssetState::Loaded)
+		if (entry->State == AssetState::Loaded && entry->CpuData)
 		{
-			CreateGpuResource(*entry);
+			CreateGpuResource(*entry, entry->Name);
 		}
 	}
 
@@ -205,39 +180,6 @@ namespace Ryu::Asset
 	}
 
 	template<typename TAssetData, typename TGpuResource>
-	inline void AssetCache<TAssetData, TGpuResource>::AddRef(AssetHandle<TAssetData> handle)
-	{
-		RYU_PROFILE_SCOPE();
-		std::unique_lock lock(m_mutex);
-
-		if (Entry* entry = FindEntry(handle.Id))
-		{
-			++entry->RefCount;
-		}
-	}
-
-	template<typename TAssetData, typename TGpuResource>
-	inline void AssetCache<TAssetData, TGpuResource>::Release(AssetHandle<TAssetData> handle)
-	{
-		RYU_PROFILE_SCOPE();
-		std::unique_lock lock(m_mutex);
-
-		Entry* entry = FindEntry(handle.Id);
-		if (!entry || entry->RefCount == 0)
-			return;
-
-		--entry->RefCount;
-
-		if (entry->RefCount == 0 && !entry->IsProcedural)
-		{
-			// Release GPU resource first (may have dependencies on CPU data)
-			entry->GpuResource.reset();
-			entry->CpuData.reset();
-			entry->State = AssetState::Unloaded;
-		}
-	}
-
-	template<typename TAssetData, typename TGpuResource>
 	inline void AssetCache<TAssetData, TGpuResource>::Invalidate(AssetHandle<TAssetData> handle)
 	{
 		RYU_PROFILE_SCOPE();
@@ -249,10 +191,22 @@ namespace Ryu::Asset
 			return;
 		}
 
-		// Clear GPU resource, keep CPU data option for reload
+		// Clear resources and reload
 		entry->GpuResource.reset();
 		entry->CpuData.reset();
-		entry->State = AssetState::Unloaded;
+		entry->State = AssetState::Loading;
+
+		// Reload CPU data
+		entry->CpuData = LoadAsset<TAssetData>(entry->SourcePath);
+		if (entry->CpuData)
+		{
+			entry->State = AssetState::Loaded;
+		}
+		else
+		{
+			RYU_LOG_ERROR("Failed to reload asset from {}", entry->SourcePath.string());
+			entry->State = AssetState::Failed;
+		}
 	}
 
 	template<typename TAssetData, typename TGpuResource>
@@ -267,7 +221,18 @@ namespace Ryu::Asset
 			{
 				entry.GpuResource.reset();
 				entry.CpuData.reset();
-				entry.State = AssetState::Unloaded;
+				entry.State = AssetState::Loading;
+
+				// Reload CPU data
+				entry.CpuData = LoadAsset<TAssetData>(entry.SourcePath);
+				if (entry.CpuData)
+				{
+					entry.State = AssetState::Loaded;
+				}
+				else
+				{
+					entry.State = AssetState::Failed;
+				}
 			}
 		}
 	}

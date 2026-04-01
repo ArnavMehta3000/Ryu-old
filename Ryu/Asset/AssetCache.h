@@ -20,24 +20,23 @@ namespace Ryu::Asset
 			std::unique_ptr<TGpuResource> GpuResource;
 			fs::path                      SourcePath;
 			std::string                   Name;
-			AssetState                    State = AssetState::Unloaded;
-			u32                           RefCount = 0;
+			AssetState                    State = AssetState::Loading;
 			bool                          IsProcedural = false;
 		};
 
 	public:
 		explicit AssetCache(IGpuResourceFactory* gpuFactory) : m_gpuFactory(gpuFactory) {}
 
-		// Register asset from file path (lazy loading)
-		[[nodiscard]] AssetHandle<TAssetData> Register(const fs::path& path);
+		// Load asset from file path (starts loading immediately)
+		[[nodiscard]] AssetHandle<TAssetData> Load(const fs::path& path);
 
-		// Register procedural asset with explicit ID and data
-		[[nodiscard]] AssetHandle<TAssetData> Register(AssetId id, std::unique_ptr<TAssetData> data, std::string_view name = "");
+		// Load procedural asset with explicit ID and data
+		[[nodiscard]] AssetHandle<TAssetData> Load(AssetId id, std::unique_ptr<TAssetData> data, std::string_view name = "");
 
-		// Register procedural asset with string ID
-		[[nodiscard]] AssetHandle<TAssetData> Register(std::string_view name, std::unique_ptr<TAssetData> data);
+		// Load procedural asset with string ID
+		[[nodiscard]] AssetHandle<TAssetData> Load(std::string_view name, std::unique_ptr<TAssetData> data);
 
-		// Get CPU/GPU data - loads on demand
+		// Get CPU/GPU data (GPU creation is lazy on first access)
 		[[nodiscard]] TGpuResource* GetGpu(AssetHandle<TAssetData> handle);
 		[[nodiscard]] const TAssetData* GetCpu(AssetHandle<TAssetData> handle);
 
@@ -46,9 +45,6 @@ namespace Ryu::Asset
 		// Force load without accessing
 		void EnsureCpuLoaded(AssetHandle<TAssetData> handle);
 		void EnsureGpuReady(AssetHandle<TAssetData> handle);
-
-		void AddRef(AssetHandle<TAssetData> handle);
-		void Release(AssetHandle<TAssetData> handle);
 
 		[[nodiscard]] AssetState GetState(AssetHandle<TAssetData> handle) const;
 		void Invalidate(AssetHandle<TAssetData> handle);

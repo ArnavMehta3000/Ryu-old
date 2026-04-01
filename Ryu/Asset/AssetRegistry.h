@@ -30,7 +30,7 @@ namespace Ryu::Asset
 		void InvalidateAll();
 
 	private:
-		void RegisterPrimitives();
+		void LoadPrimitives();
 
 	private:
 		MeshCache m_meshCache;
