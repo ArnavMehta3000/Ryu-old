@@ -7,7 +7,6 @@ namespace Ryu::Engine
 	{
 		App::IApplication*     App            = nullptr;
 		Logging::Logger*       Logger         = nullptr;
-		Config::ConfigManager* Config         = nullptr;
 		Config::CmdLine*       CmdLine        = nullptr;
 		App::PathManager*      PathManager    = nullptr;
 		Gfx::Renderer*         Renderer       = nullptr;
@@ -26,7 +25,6 @@ namespace Ryu::Engine
 
 		static void Register(App::IApplication* app);
 		static void Register(Logging::Logger* logger);
-		static void Register(Config::ConfigManager* config);
 		static void Register(Config::CmdLine* cmdLine);
 		static void Register(App::PathManager* pathManager);
 		static void Register(Gfx::Renderer* renderer);

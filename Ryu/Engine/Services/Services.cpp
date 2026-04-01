@@ -37,14 +37,6 @@ namespace Ryu::Engine
         }
     }
 
-    void ServiceLocator::Register(Config::ConfigManager* service)
-    {
-        if (s_initialized)
-        {
-            s_services.Config = service;
-        }
-    }
-
     void ServiceLocator::Register(Config::CmdLine* service)
     {
         if (s_initialized)

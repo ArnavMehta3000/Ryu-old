@@ -1,6 +1,7 @@
 #pragma once
 #include "Editor/Panels/IEditorPanel.h"
 #include "Game/World/Entity.h"
+#include "Application/Event/Event.h"
 
 namespace Ryu::Game { class Entity;  struct EntityMetadata; }
 

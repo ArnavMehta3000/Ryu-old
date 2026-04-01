@@ -1,9 +1,9 @@
 #include "Engine/Setup/Setup.h"
 
 #include "Core/Config/CmdLine.h"
+#include "Core/Globals/Globals.h"
 #include "Core/Logging/Logger.h"
 #include "Core/Utils/MessageBox.h"
-#include "Engine/EngineSettings.h"
 #include <filesystem>
 #include <wrl/event.h>
 
@@ -73,31 +73,23 @@ namespace Ryu::Engine
 
 		// Setup logging
 		{
-			Settings& settings = Settings::Get();
-
-			// Get the lower of the cmdline and cvar
-			i32 level = std::min(settings.LogLevel.Get(), cv_logLevel.Get());
-			// Clamp the level to the user set and the max we can have at compile time
-			level = std::clamp(level, 0, static_cast<i32>(Logging::COMPILE_TIME_LOG_LEVEL));
+			// Clamp the level to the max we can have at compile time
+			i32 level = std::clamp(cv_logLevel.Get(), 0, static_cast<i32>(Logging::COMPILE_TIME_LOG_LEVEL));
 
 			Logging::LoggingConfig config{};
 
 			config.RuntimeLogLevel = static_cast<Logging::LogLevel>(level);
-			
-			config.Sinks.Console                = cv_logConsole || settings.LogToConsole.Get();
-			config.Sinks.File                   = cv_logFile || settings.LogToFile.Get();
-			config.Sinks.Debug                  = cv_logDebug;
-			config.Sinks.LogFilePath            = cv_logFilePath;
 
-			config.Pattern.IncludeTimestamp     = cv_logHasTimestamp;
-			config.Pattern.IncludeThreadId      = settings.LogThreadId.Get();
-			
-			// Check if the user has set a custom pattern (either from CVar or CmdLine)
-			if (!settings.LogCustomPatten.Get().empty())
-			{
-				config.Pattern.CustomPattern = settings.LogCustomPatten.Get();
-			}
-			else if (!cv_logPattern.Get().empty() )
+			config.Sinks.Console                = cv_logConsole.Get();
+			config.Sinks.File                   = cv_logFile.Get();
+			config.Sinks.Debug                  = cv_logDebug.Get();
+			config.Sinks.LogFilePath            = cv_logFilePath.Get();
+
+			config.Pattern.IncludeTimestamp     = cv_logHasTimestamp.Get();
+			config.Pattern.IncludeThreadId      = cv_logHasThreadID.Get();
+
+			// Check if the user has set a custom pattern from CmdLine
+			if (!cv_logPattern.Get().empty())
 			{
 				config.Pattern.CustomPattern = cv_logPattern.Get();
 			}

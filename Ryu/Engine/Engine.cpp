@@ -2,7 +2,6 @@
 
 #include "Application/App/Utils/PathManager.h"
 #include "Core/Config/CmdLine.h"
-#include "Core/Config/ConfigManager.h"
 #include "Core/Globals/Globals.h"
 #include "Core/Logging/Logger.h"
 #include "Core/Profiling/Profiling.h"
@@ -57,8 +56,6 @@ namespace Ryu::Engine
 		RYU_PROFILE_BOOKMARK("Engine Initialize");
 
 		ServiceLocator::Initialize();
-		Config::ConfigManager::Get().Initialize(App::PathManager::Get().GetConfigDir());
-		
 
 		RYU_LOG_DEBUG("Initializing Engine");
 
@@ -91,7 +88,6 @@ namespace Ryu::Engine
 		// Register services
 		ServiceLocator::Register(m_currentApp);
 		ServiceLocator::Register(&Logging::Logger::Get());
-		ServiceLocator::Register(&Config::ConfigManager::Get());
 		ServiceLocator::Register(&Config::CmdLine::Get());
 		ServiceLocator::Register(&App::PathManager::Get());
 		ServiceLocator::Register(m_renderer.get());
@@ -119,8 +115,6 @@ namespace Ryu::Engine
 		m_renderer.reset();
 
 		m_currentApp = nullptr;
-
-		Config::ConfigManager::Get().SaveAll();
 
 		PrintMemoryStats();
 	}
