@@ -1,12 +1,12 @@
 #pragma once
-#include "Core/API.h"
-#include "Core/Defines.h"
+#include "Core/Common/API.h"
+#include "Core/Common/StandardTypes.h"
 #include <filesystem>
 #include <string>
 
 namespace Ryu::Config
 {
-	struct RAPI EditorConfig
+	struct RYU_API EditorConfig
 	{
 		// UI Settings
 		struct

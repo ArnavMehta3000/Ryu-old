@@ -1,13 +1,11 @@
 #pragma once
 #include "Math/Math.h"
-#include "Core/Utils/Reflection.h"
 
 namespace Ryu::Game
 {
 	struct Transform
 	{
 		static constexpr auto ComponentName = "Transform";
-		RYU_ENABLE_REFLECTION(Transform)
 
 		Transform(const SM::Vector3& position, const SM::Quaternion& orientation, const SM::Vector3& scale);
 		Transform(const SM::Vector3& position);
@@ -28,11 +26,3 @@ namespace Ryu::Game
 		SM::Vector3 Scale;
 	};
 }
-
-RYU_REFLECTED_CLASS(
-	::Ryu::Game::Transform,
-	"Transform",
-	RYU_CLASS_ATTRIB(::Ryu::Game::Transform, Position),
-	RYU_CLASS_ATTRIB(::Ryu::Game::Transform, Orientation),
-	RYU_CLASS_ATTRIB(::Ryu::Game::Transform, Scale)
-)

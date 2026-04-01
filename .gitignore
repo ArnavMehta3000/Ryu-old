@@ -11,3 +11,4 @@ Docs/Sphinx
 xmake-requires.lock
 compile_commands.json
 CmakeLists.txt
+Claude.md

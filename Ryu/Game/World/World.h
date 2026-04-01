@@ -1,5 +1,4 @@
 #pragma once
-#include "Core/Utils/Serializer.h"
 #include "Core/Utils/Timing/FrameTimer.h"
 #include <entt/entity/registry.hpp>
 
@@ -29,11 +28,6 @@ namespace Ryu::Game
 		u64 GetEntityCount() const;
 		void ProcessPendingDestructions();
 		u64 GetPendingDestructionCount() const;
-
-		template <Utils::Serializable T> toml::table SerializeComponent(EntityHandle handle);
-		template <Utils::Serializable... Ts> auto SerializeComponents(EntityHandle handle);
-
-		template <Utils::Deserializable T> void DeserializeIntoExistingComponent(EntityHandle handle, const toml::table& table);
 
 		[[nodiscard]] inline auto GetAllEntities() const { return m_registry.view<EntityHandle>(); }
 		[[nodiscard]] inline Registry& GetRegistry() { return m_registry; }

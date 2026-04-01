@@ -1,6 +1,5 @@
 #pragma once
 #include "Core/Utils/UUID.h"
-#include "Core/Utils/Reflection.h"
 #include <bitset>
 
 namespace Ryu::Game
@@ -21,7 +20,6 @@ namespace Ryu::Game
 	struct EntityMetadata
 	{
 		static constexpr auto ComponentName = "Entity Metadata";
-		RYU_ENABLE_REFLECTION(EntityMetadata);
 	
 	public:
 		explicit EntityMetadata()
@@ -46,12 +44,5 @@ namespace Ryu::Game
 		std::string m_uuidBytes;
 	};
 }
-
-RYU_REFLECTED_CLASS(
-	Ryu::Game::EntityMetadata,
-	"EntityMetadata",
-	RYU_CLASS_ATTRIB(Ryu::Game::EntityMetadata, Name),
-	RYU_CLASS_ATTRIB(Ryu::Game::EntityMetadata, Flags),
-	RYU_CLASS_ATTRIB(Ryu::Game::EntityMetadata, m_uuidBytes))
 
 #include "EntityMetadata.inl"

@@ -2,7 +2,6 @@
 
 #include "Application/App/Utils/PathManager.h"
 #include "Core/Profiling/Profiling.h"
-#include "Core/Utils/ReflectionSerializer.h"
 #include "Engine/Engine.h"
 #include "Game/Components/TransformComponent.h"
 #include "Game/World/Entity.h"
@@ -64,31 +63,5 @@ void TestbenchApp::OnTick(const Ryu::Utils::FrameTimer& timer)
 
 void TestbenchApp::TestSerialization()
 {
-	RYU_PROFILE_SCOPE();
-	Game::World* world = m_worldManager.GetActiveWorld();
-	world->CreateEntity("Player1").GetComponent<Game::Transform>().Position.z = 15.7f;
-	world->CreateEntity("Player2").GetComponent<Game::Transform>().Position.x = 100.2f;
-
-	toml::table root;
-	toml::array entitiesArray;
-
-	world->GetAllEntities().each(
-	[&](Game::EntityHandle handle)
-	{
-		auto [metadataTable, transformTable] = world->SerializeComponents<Game::EntityMetadata, Game::Transform>(handle);
-
-		toml::table componentsTable;
-		componentsTable.insert("metadata", std::move(metadataTable));
-		componentsTable.insert("transform", std::move(transformTable));
-
-		toml::table entityTable;
-		entityTable.insert("components", std::move(componentsTable));
-
-		entitiesArray.push_back(std::move(entityTable));
-	});
-	root.insert("entities", std::move(entitiesArray));
-
-	//auto outDir = Ryu::App::PathManager::Get().GetProjectDir() / "saved.toml";
-	//std::ofstream out(outDir.string());
-	//out << root;
+	// Serialization removed - no longer needed
 }
