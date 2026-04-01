@@ -154,7 +154,6 @@ target("RyuEngine")
 	set_group("Ryu")
 
 	add_files("Engine/**.cpp", { unity_group = "Engine" })
-	add_files("Engine/HotReload/**.cpp", { unity_group = "HotReload" })
 	add_headerfiles("Engine/**.h", { public = true })
 
 	add_deps(

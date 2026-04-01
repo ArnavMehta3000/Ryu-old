@@ -1,11 +1,10 @@
 #include "Testbench/Game/TestbenchGameState.h"
-
-#include "Game/Core/GameServices.h"
+#include "Core/Logging/Logger.h"
 #include "Testbench/Game/TestbenchWorld.h"
 
 bool TestbenchGameState::Initialize()
 {
-    RYU_GAME_LOG_INFO("TestbenchGameState initializing");
+    RYU_LOG_INFO("TestbenchGameState initializing");
 
     m_worldManager.CreateWorld<TestbenchWorld>();
 
@@ -20,7 +19,7 @@ void TestbenchGameState::Tick(float deltaTime)
 
 void TestbenchGameState::Shutdown()
 {
-    RYU_GAME_LOG_INFO("TestbenchGameState shutting down");
+    RYU_LOG_INFO("TestbenchGameState shutting down");
 }
 
 void* TestbenchGameState::GetWorldManager()
@@ -59,6 +58,6 @@ void* TestbenchGameState::GetWorldManager()
 //            return false;
 //    }
 //
-//    RYU_GAME_LOG_INFO("State restored: totalTime={}", m_totalTime);
+//    RYU_LOG_INFO("State restored: totalTime={}", m_totalTime);
 //    return true;
 //}

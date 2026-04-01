@@ -24,10 +24,6 @@ target("RyuEditor")
         add_rules("c++.unity_build")
     end
 
-    if has_config("ryu-enable-hot-reload") then
-        add_defines("RYU_HOT_RELOAD")
-    end
-
     after_build( function(target)
         import("lib.detect.find_tool")
         

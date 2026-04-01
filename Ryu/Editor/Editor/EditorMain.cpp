@@ -32,7 +32,6 @@ RYU_MAIN()
 				.Type              = Window::WindowType::Windowed,
 			},
 			.GameModulePath  = CmdLine::Get().GetCVarValue("Game.ModulePath"),
-			.EnableHotReload = true,
 		};
 
 		auto editorApp = std::make_shared<Editor::EditorApp>(editorConfig);

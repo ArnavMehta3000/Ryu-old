@@ -1,5 +1,10 @@
 #pragma once
-#include "Game/Core/GameServices.h"
+
+namespace Ryu::App { class IApplication; class PathManager; }
+namespace Ryu::Logging { class Logger; }
+namespace Ryu::Config { class CmdLine; }
+namespace Ryu::Gfx { class Renderer; class ShaderCompiler; }
+namespace Ryu::Game { class InputManager; }
 
 namespace Ryu::Game
 {
@@ -8,7 +13,6 @@ namespace Ryu::Game
 	public:
 		[[nodiscard]] static App::IApplication* GetApplication();
 		[[nodiscard]] static Logging::Logger* GetLogger();
-		[[nodiscard]] static Config::ConfigManager* GetConfigManager();
 		[[nodiscard]] static Config::CmdLine* GetCmdLine();
 		[[nodiscard]] static App::PathManager* GetPathManager();
 		[[nodiscard]] static Gfx::Renderer* GetRenderer();

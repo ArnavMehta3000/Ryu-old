@@ -1,6 +1,5 @@
 #pragma once
 #include "Application/App/Application.h"
-#include "Engine/HotReload/GameModuleHost.h"
 #include "Core/Utils/Singleton.h"
 #include "Graphics/Renderer.h"
 #include "Game/InputManager.h"
@@ -13,9 +12,7 @@ namespace Ryu::Engine
 	struct EngineConfig
 	{
 		Window::Window::Config Window;
-		fs::path               GameModulePath;
-		bool                   EnableHotReload = false;
-		Gfx::IRendererHook*    RendererHook    = nullptr;
+		Gfx::IRendererHook*    RendererHook = nullptr;
 	};
 
 	class Engine : public Utils::Singleton<Engine>

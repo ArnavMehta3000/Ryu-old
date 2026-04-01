@@ -10,7 +10,6 @@
 #include "Editor/Panels/ComponentPanels/MeshRendererPanel.h"
 #include "Editor/Panels/ComponentPanels/TransformComponentPanel.h"
 #include "Editor/Panels/EntityDetailsPanel.h"
-#include "Editor/Panels/HotReloadPanel.h"
 #include "Editor/Panels/MenuBarPanel.h"
 #include "Editor/Panels/OutlinerPanel.h"
 #include "Engine/Engine.h"
@@ -78,7 +77,6 @@ namespace Ryu::Editor
 
 	EditorApp::EditorApp(const EditorConfig& config)
 		: m_gameModulePath(config.GameModulePath)
-		, m_hotReloadEnabled(config.EnableHotReload)
 	{
 		RYU_PROFILE_SCOPE();
 
@@ -93,19 +91,7 @@ namespace Ryu::Editor
 
 	Game::WorldManager* EditorApp::GetWorldManager() noexcept
 	{
-#if defined(RYU_HOT_RELOAD)
-		if (m_moduleHost && m_moduleHost->IsLoaded())
-		{
-			return static_cast<Game::WorldManager*>(m_moduleHost->GetWorldManager());
-		}
-#endif
-
-		if (m_userApp)
-		{
-			return m_userApp->GetWorldManager();
-		}
-
-		return nullptr;
+		return m_userApp ? m_userApp->GetWorldManager() : nullptr;
 	}
 
 	void EditorApp::RequestQuit()
@@ -140,15 +126,6 @@ namespace Ryu::Editor
 		RYU_PROFILE_SCOPE();
 		RYU_LOG_INFO("Shutting down editor application");
 
-#if defined(RYU_HOT_RELOAD)
-		if (m_moduleHost)
-		{
-			m_moduleHost->Shutdown();
-			m_moduleHost->Unload();
-			m_moduleHost.reset();
-		}
-#endif
-
 		if (m_userApp)
 		{
 			m_userApp->OnShutdown();
@@ -178,12 +155,6 @@ namespace Ryu::Editor
 
 		// Assets panel
 		m_editorPanels[AssetsPanel::Name] = std::make_unique<AssetsPanel>(this, renderer->GetAssetRegistry());
-
-
-		// Add hot-reload panel
-#if defined (RYU_HOT_RELOAD)
-		m_editorPanels[HotReloadPanel::Name] = std::make_unique<HotReloadPanel>(this, m_moduleHost.get());
-#endif
 	}
 
 	void EditorApp::OnTick(const Utils::FrameTimer& timer)
@@ -196,68 +167,16 @@ namespace Ryu::Editor
 			m_window->Update();
 		}
 
-#if defined(RYU_HOT_RELOAD)
-		// Test a hot-reload
-		if (m_window->GetInput().IsKeyDown(Window::KeyCode::Y) && m_moduleHost) [[unlikely]]
-		{
-			m_moduleHost->Reload();
-		}
-
-		// Hot-reload path: tick through module host
-		if (m_moduleHost && m_moduleHost->IsLoaded())
-		{
-			m_moduleHost->Tick(timer);
-		}
-		else
-#endif
-		// Static linking path: tick user app directly
+		// Tick user app
 		if (m_userApp)
 		{
 			m_userApp->OnTick(timer);
 		}
 	}
 
-#if defined(RYU_HOT_RELOAD)
-	void EditorApp::TriggerReload()
-	{
-		if (m_moduleHost)
-		{
-			auto result = m_moduleHost->Reload();
-			if (!result)
-			{
-				RYU_LOG_ERROR("Hot-reload failed: {}", ToString(result.error()));
-			}
-		}
-	}
-
-	void EditorApp::SetAutoReloadEnabled(bool enabled)
-	{
-		m_hotReloadEnabled = enabled;
-		if (m_moduleHost)
-		{
-			m_moduleHost->EnableAutoReload(enabled);
-		}
-	}
-
-	bool EditorApp::IsAutoReloadEnabled() const
-	{
-		return m_hotReloadEnabled;
-	}
-#endif
-
 	bool EditorApp::LoadGameModule()
 	{
 		RYU_PROFILE_SCOPE();
-
-#if defined(RYU_HOT_RELOAD)
-		// If a game module path is specified, use dynamic loading
-		if (!m_gameModulePath.empty())
-		{
-			return LoadGameModuleDynamic();
-		}
-#endif
-
-		// Fall back to static linking
 		return LoadGameModuleStatic();
 	}
 
@@ -266,7 +185,6 @@ namespace Ryu::Editor
 		RYU_PROFILE_SCOPE();
 		RYU_LOG_DEBUG("Loading game module (static linking)");
 
-#if !defined(RYU_HOT_RELOAD)
 		// Use the statically linked CreateGameModule function
 		std::unique_ptr<Game::IGameModule> gm(Game::CreateGameModule());
 		if (gm)
@@ -284,47 +202,7 @@ namespace Ryu::Editor
 
 		RYU_LOG_ERROR("Failed to create game module (static)");
 		return false;
-#else
-		RYU_LOG_WARN("Static linking requested but RYU_HOT_RELOAD is defined");
-		return false;
-#endif
 	}
-
-#if defined(RYU_HOT_RELOAD)
-	bool EditorApp::LoadGameModuleDynamic()
-	{
-		RYU_PROFILE_SCOPE();
-		RYU_LOG_DEBUG("Loading game module dynamically: {}", m_gameModulePath.string());
-
-		m_moduleHost = std::make_unique<Engine::GameModuleHost>();
-
-		auto result = m_moduleHost->Load(m_gameModulePath);
-		if (!result)
-		{
-			RYU_LOG_ERROR("Failed to load game DLL: {}", ToString(result.error()));
-			m_moduleHost.reset();
-			return false;
-		}
-
-		// Enable auto-reload if requested
-		m_moduleHost->EnableAutoReload(m_hotReloadEnabled);
-
-		// Update window title with module name
-		const auto& info = m_moduleHost->GetModuleInfo();
-		m_window->SetTitle(fmt::format("Ryu Editor - {}", info.Name));
-
-		// Initialize the game
-		if (!m_moduleHost->Initialize())
-		{
-			RYU_LOG_ERROR("Game module initialization failed");
-			m_moduleHost->Unload();
-			m_moduleHost.reset();
-			return false;
-		}
-
-		return true;
-	}
-#endif
 
 #if defined(RYU_WITH_EDITOR)
 	void EditorApp::OnImGuiSetup(Gfx::Device* device)
@@ -445,14 +323,6 @@ namespace Ryu::Editor
 		RYU_PROFILE_SCOPE();
 
 		ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
-
-#if defined(RYU_HOT_RELOAD)
-		// Game's ImGui rendering (hot-reload path)
-		if (m_moduleHost && m_moduleHost->IsLoaded())
-		{
-			m_moduleHost->OnEditorRender();
-		}
-#endif
 
 		for (auto& [name, panel] : m_editorPanels)
 		{

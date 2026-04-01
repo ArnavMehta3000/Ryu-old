@@ -1,8 +1,8 @@
 #include "Graphics/Core/GfxDevice.h"
 #include "Graphics/Core/GfxDeviceChild.h"
-#include "Graphics/GraphicsSettings.h"
 #include "Graphics/Core/Debug/DebugLayer.h"
 #include "Core/Utils/StringConv.h"
+#include "Core/Globals/Globals.h"
 #include "Math/Math.h"
 #include "Core/Profiling/Profiling.h"
 #include <DirectXColors.h>
@@ -44,10 +44,8 @@ namespace Ryu::Gfx
 		u32 dxgiFactoryFlags = 0;
 
 #if defined(RYU_BUILD_DEBUG)
-		const Settings& settings = Settings::Get();
-
-		const bool isDebugLayerEnabled = settings.EnableDebugLayer;
-		const bool isValidationEnabled = settings.EnableValidation;
+		const bool isDebugLayerEnabled = Globals::g_isDebug;
+		const bool isValidationEnabled = Globals::g_isDebug;
 
 		DebugLayer::Initialize(isDebugLayerEnabled, isValidationEnabled);
 		if (isDebugLayerEnabled)
@@ -141,12 +139,15 @@ namespace Ryu::Gfx
 	void Device::Present()
 	{
 		RYU_PROFILE_BOOKMARK("Present");
-		static auto& settings = Settings::Get();
 
-		u32 syncInterval = settings.EnableVSync ? 1 : 0;
+		// TODO: Make these configurable via CVars or config file
+		constexpr bool enableVSync = false;
+		constexpr bool allowTearing = true;
+
+		u32 syncInterval = enableVSync ? 1 : 0;
 		u32 presentFlags = 0;
 
-		if (m_supportsTearing && settings.AllowTearing && syncInterval == 0)
+		if (m_supportsTearing && allowTearing && syncInterval == 0)
 		{
 			presentFlags = DXGI_PRESENT_ALLOW_TEARING;
 		}

@@ -5,24 +5,19 @@
 #include "Application/App/Application.h"
 #include <filesystem>
 
-#if defined(RYU_HOT_RELOAD)
-#include "Engine/HotReload/GameModuleHost.h"
-#endif
-
 namespace Ryu::Editor
 {
 	namespace fs = std::filesystem;
 
 	struct EditorConfig
 	{
-		Window::Window::Config WindowConfig = 
+		Window::Window::Config WindowConfig =
 		{
 			.Title             = "Ryu Editor",
 			.CanBorderlessDrag = true,
 			.Type              = Window::WindowType::Windowed
 		};
 		fs::path GameModulePath;
-		bool EnableHotReload = false;
 	};
 
 	// Abstraction around the user application loaded via the game module
@@ -55,20 +50,11 @@ namespace Ryu::Editor
 			return m_editorPanels.contains(T::Name) ? static_cast<T*>(m_editorPanels[T::Name].get()) : nullptr;
 		}
 
-#if defined(RYU_HOT_RELOAD)
-		void TriggerReload();
-		void SetAutoReloadEnabled(bool enabled);
-		[[nodiscard]] bool IsAutoReloadEnabled() const;
-#endif
 
 	private:
 		void InitEditorPanels();
 		bool LoadGameModule();
 		bool LoadGameModuleStatic();
-
-#if defined(RYU_HOT_RELOAD)
-		bool LoadGameModuleDynamic();
-#endif
 
 #if defined(RYU_WITH_EDITOR)
 		void OnImGuiSetup(Gfx::Device* device) override;
@@ -86,14 +72,10 @@ namespace Ryu::Editor
 		bool m_isRunning = false;
 
 		fs::path m_gameModulePath;
-		bool m_hotReloadEnabled = false;
 
-		// Static linking mode (legacy)
+		// Static linking mode
 		std::shared_ptr<App::App> m_userApp;
 
-#if defined(RYU_HOT_RELOAD)
-		std::unique_ptr<Engine::GameModuleHost> m_moduleHost;
-#endif
 		std::unique_ptr<Gfx::DescriptorHeap> m_imguiHeap;
 	};
 }
