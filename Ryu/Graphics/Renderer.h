@@ -22,7 +22,7 @@ namespace Ryu::Gfx
 	class Renderer
 	{
 	public:
-		Renderer(HWND window, IRendererHook* hook = nullptr);
+		Renderer(HWND window, const DeviceConfig& config = {}, IRendererHook* hook = nullptr);
 		~Renderer();
 
 		[[nodiscard]] inline Asset::IGpuResourceFactory* GetGpuResourceFactory() { return &m_gpuFactory; }

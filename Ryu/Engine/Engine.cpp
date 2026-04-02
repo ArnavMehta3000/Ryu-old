@@ -2,6 +2,7 @@
 
 #include "Application/App/Utils/PathManager.h"
 #include "Core/Config/CmdLine.h"
+#include "Core/Config/GameConfig.h"
 #include "Core/Globals/Globals.h"
 #include "Core/Logging/Logger.h"
 #include "Core/Profiling/Profiling.h"
@@ -76,8 +77,21 @@ namespace Ryu::Engine
 		Window::Window* window = m_currentApp->GetWindow();
 		RYU_ASSERT(window != nullptr, "Application must have a valid window");
 
+		// Load game config from project config directory
+		const Config::GameConfig gameConfig = Config::GameConfig::Load(App::PathManager::Get().GetConfigDir());
+
+		// Build device config from loaded settings
+		const Gfx::DeviceConfig deviceConfig
+		{
+			.EnableVsync         = gameConfig.Graphics.EnableVsync,
+			.AllowTearing        = gameConfig.Graphics.AllowTearing,
+			.EnableDebugLayer    = gameConfig.Graphics.EnableDebugLayer,
+			.EnableGPUValidation = gameConfig.Graphics.EnableGPUValidation,
+			.UseWARP             = gameConfig.Graphics.UseWARP,
+		};
+
 		// Init renderer & cache asset registry in mesh renderer
-		m_renderer = std::make_unique<Gfx::Renderer>(window->GetHandle(), rendererHook);
+		m_renderer = std::make_unique<Gfx::Renderer>(window->GetHandle(), deviceConfig, rendererHook);
 		Game::MeshRenderer::m_assetRegistry = m_renderer->GetAssetRegistry();
 
 		// Init input manager

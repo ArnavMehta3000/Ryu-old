@@ -1,7 +1,8 @@
 [Debug]
 EnableDebugLayer = true
-EnableDebugValidation = true
+EnableGPUValidation = false
 
 [Rendering]
 AllowTearing = true
-EnableVsync = true
+EnableVsync = false
+UseWARP = false

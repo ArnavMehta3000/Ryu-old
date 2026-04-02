@@ -30,8 +30,6 @@ Ryu Engine is an experimentation playground for making game engines<br>
 
 `--ryu-log-level=RYU-LOG-LEVEL` Set the log level
 
-`--ryu-enable-hot-reload=[y|n]` Enable hot-reload for game code (requires editor) (default: n)
-
 These configs can be set using the project generator in extended mode or the following command:
 
 ```bash
@@ -69,11 +67,10 @@ Ryu identifies its root directory by looking for the `Ryu.toml` configuration fi
 
 - Paths
 	- `ProjectDir` - Which project directory to look for assets/scripts/config files (defines the active project). This is relative to the engine root directory
-	- `GameDLLName` - Project DLL name can differ from project name. This can be ignored if building the game as standalone, but is required if `--ryu-build-with-editor` is enabled
 
 ## The Testbench
 
-The Testbench is a dummy game project that is used for testing purposes. By default Testbench is run as a standalone executable. But if `--ryu-build-with-editor=y` is set, then it will be built as a DLL. In such a scenario, the editor project will be built and be used as the executable to run.
+The Testbench is a dummy game project that is used for testing purposes. By default Testbench is run as a standalone executable. If `--ryu-build-with-editor=y` is set, then it will be statically linked into the editor executable.
 
 ### Testbench Config
 

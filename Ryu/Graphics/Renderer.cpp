@@ -11,8 +11,8 @@
 
 namespace Ryu::Gfx
 {
-    Renderer::Renderer(HWND window, IRendererHook* hook)
-        : m_device(std::make_unique<Device>(window))
+    Renderer::Renderer(HWND window, const DeviceConfig& config, IRendererHook* hook)
+        : m_device(std::make_unique<Device>(window, config))
         , m_gpuFactory(m_device.get())
         , m_assets(&m_gpuFactory)
         , m_shaderLibrary("./Shaders/Compiled"sv)

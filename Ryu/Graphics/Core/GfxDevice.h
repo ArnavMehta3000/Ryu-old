@@ -7,10 +7,19 @@
 
 namespace Ryu::Gfx
 {
+	struct DeviceConfig
+	{
+		bool EnableVsync         = false;
+		bool AllowTearing        = true;
+		bool EnableDebugLayer    = false;
+		bool EnableGPUValidation = false;
+		bool UseWARP             = false;
+	};
+
 	class Device
 	{
 	public:
-		Device(HWND window);
+		Device(HWND window, const DeviceConfig& config = {});
 		~Device();
 
 		void Initialize();
@@ -47,6 +56,7 @@ namespace Ryu::Gfx
 		void CreateFrameResources(bool isResizing);
 
 	private:
+		DeviceConfig                         m_config;
 		CD3DX12FeatureSupport                m_featureSupport;
 		bool                                 m_isWarpDevice = false;
 		bool                                 m_supportsTearing = false;
