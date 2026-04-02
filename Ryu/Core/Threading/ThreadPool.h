@@ -1,5 +1,5 @@
 #pragma once
-#include "Threading/Job.h"
+#include "Core/Threading/Job.h"
 #include <queue>
 #include <future>
 
@@ -29,4 +29,4 @@ namespace Ryu::MT
 	};
 }
 
-#include "Threading/ThreadPool.inl"
+#include "Core/Threading/ThreadPool.inl"

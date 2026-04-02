@@ -1,6 +1,6 @@
 #pragma once
 #include "Asset/AssetData.h"
-#include "Math/Math.h"
+#include "Core/Math/Math.h"
 
 namespace Ryu::Gfx
 {

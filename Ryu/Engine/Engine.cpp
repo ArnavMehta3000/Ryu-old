@@ -10,8 +10,8 @@
 #include "Game/Components/MeshRenderer.h"
 #include "Game/World/WorldManager.h"
 #include "Graphics/Compiler/ShaderCompiler.h"
-#include "Math/Math.h"
-#include "Memory/New.h"
+#include "Core/Math/Math.h"
+#include "Core/Memory/New.h"
 #include <DirectXMath.h>
 
 namespace Ryu::Engine

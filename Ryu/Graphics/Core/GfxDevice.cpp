@@ -3,7 +3,7 @@
 #include "Graphics/Core/Debug/DebugLayer.h"
 #include "Core/Utils/StringConv.h"
 #include "Core/Globals/Globals.h"
-#include "Math/Math.h"
+#include "Core/Math/Math.h"
 #include "Core/Profiling/Profiling.h"
 #include <DirectXColors.h>
 

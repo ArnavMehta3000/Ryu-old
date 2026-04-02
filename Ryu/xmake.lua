@@ -17,6 +17,9 @@ target("RyuCore")
 	add_files("Core/Globals/**.cpp", { unity_group = "Globals" })
 	add_files("Core/Logging/**.cpp", { unity_group = "Logging" })
 	add_files("Core/Utils/**.cpp", { unity_group = "Utilities" })
+	add_files("Core/Math/**.cpp", { unity_group = "Math" })
+	add_files("Core/Threading/**.cpp", { unity_group = "Threading" })
+	add_files("Core/Memory/**.cpp|Tests/**cpp", { unity_group = "Memory" })
 	add_headerfiles("Core/**.h", "Core/**.inl", { public = true })
 
 	-- Precompiled header
@@ -27,10 +30,23 @@ target("RyuCore")
 		"spdlog", "uuid_v4", "Elos",
 		"toml++", "cli11", "efsw", { public = true })
 
+	add_deps("SimpleMath", { public = true })
 	add_options("ryu-log-level", "ryu-enable-tracy-profiling", { public = true })
 
 	if get_config("ryu-enable-tracy-profiling") then
 		add_packages("tracy", { public = true })
+	end
+
+	-- Memory module tests
+	for _, testfile in ipairs(os.files("Core/Memory/Tests/*.cpp")) do
+		 add_tests(path.basename(testfile),
+		 {
+			 kind           = "binary",
+			 group          = "memory",
+			 files          = testfile,
+			 languages      = "cxx23",
+			 packages       = "doctest",
+		 })
 	end
 target_end()
 
@@ -48,51 +64,6 @@ target("RyuApplication")
 
 	add_options("ryu-log-level")
 	add_options("ryu-enable-tracy-profiling", { public = true })
-target_end()
-
--------------------- Math Module --------------------
-target("RyuMath")
-	set_kind('object')
-	set_group("Ryu/Objects")
-
-	add_files("Math/**.cpp", { unity_group = "Math" })
-	add_headerfiles("Math/**.h", { public = true })
-
-	add_deps("RyuCore", "SimpleMath", { public = true} )
-target_end()
-
--------------------- Threading Module --------------------
-target("RyuThreading")
-	set_kind('object')
-	set_group("Ryu/Objects")
-
-	add_files("Threading/**.cpp", { unity_group = "Threading" })
-	add_headerfiles("Threading/**.h", { public = true })
-
-	add_deps("RyuCore")
-target_end()
-
--------------------- Memory Module --------------------
-target("RyuMemory")
-	set_kind('object')
-	set_group("Ryu/Objects")
-
-	add_files("Memory/**.cpp|Tests/**cpp", { unity_group = "Memory" })  -- Ignore tests
-	add_headerfiles("Memory/**.h", { public = true })
-
-	add_deps("RyuCore")
-
-	-- Tests
-	for _, testfile in ipairs(os.files("Memory/Tests/*.cpp")) do
-		 add_tests(path.basename(testfile),
-		 {
-			 kind           = "binary",
-			 group          = "memory",
-			 files          = testfile,
-			 languages      = "cxx23",
-			 packages       = "doctest",
-		 })
-	end
 target_end()
 
 -------------------- Asset module --------------------
@@ -130,7 +101,7 @@ target("RyuGraphics")
 	-- add_files("Graphics/Shaders/**.hlsl")
 	-- add_rules("HLSLShader", { root = "Engine" })
 
-	add_deps("RyuCore", "RyuMath", "RyuShaders", "ImGui")
+	add_deps("RyuCore", "RyuShaders", "ImGui")
 	add_packages("entt", "directx-headers", "directxshadercompiler", { public = true })
 target_end()
 
@@ -144,7 +115,7 @@ target("RyuGame")
 	add_files("Game/Components/**.cpp", { unity_group = "GameComponents" })
 	add_headerfiles("Game/**.h", "Game/**.inl", { public = true })
 
-	add_deps("RyuCore", "RyuMath")
+	add_deps("RyuCore")
 	add_packages("entt", "directx-headers", { public = true })
 target_end()
 
@@ -159,11 +130,8 @@ target("RyuEngine")
 	add_deps(
 		"RyuCore",
 		"RyuApplication",
-		"RyuMath",
 		"RyuGame",
 		"RyuAsset",
-		"RyuThreading",
-		"RyuMemory",
 		"RyuGraphics",
 		{ public = true }
 	)
