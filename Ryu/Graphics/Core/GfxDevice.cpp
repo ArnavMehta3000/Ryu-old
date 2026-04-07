@@ -141,6 +141,7 @@ namespace Ryu::Gfx
 		u32 syncInterval = m_config.EnableVsync ? 1 : 0;
 		u32 presentFlags = 0;
 
+		// Only allow tearing if the display supports tearing, we want tearing and vsync is disabled
 		if (m_supportsTearing && m_config.AllowTearing && syncInterval == 0)
 		{
 			presentFlags = DXGI_PRESENT_ALLOW_TEARING;
@@ -317,6 +318,7 @@ namespace Ryu::Gfx
 		scDesc.SwapEffect         = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 		scDesc.SampleDesc.Count   = 1;
 		scDesc.SampleDesc.Quality = 0;
+		scDesc.Flags              = m_supportsTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 
 		DXGI_SWAP_CHAIN_FULLSCREEN_DESC fsDesc
 		{

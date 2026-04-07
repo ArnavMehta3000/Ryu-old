@@ -65,7 +65,12 @@ namespace Ryu::Engine
 
 	bool Setup()
 	{
-		::Windows::Foundation::Initialize(RO_INIT_MULTITHREADED);
+		if (FAILED(::Windows::Foundation::Initialize(RO_INIT_MULTITHREADED)))
+		{
+			return false;
+		}
+
+
 		if (!Config::CmdLine::Get().ParseCommandLine())
 		{
 			return false;

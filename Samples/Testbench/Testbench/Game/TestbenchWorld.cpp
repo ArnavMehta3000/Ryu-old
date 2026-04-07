@@ -7,10 +7,8 @@
 #include "Game/Components/CameraComponent.h"
 #include "Game/Components/MeshRenderer.h"
 #include "Game/Components/TransformComponent.h"
-#include "Game/Core/GameRuntime.h"
 #include <ImGui/imgui.h>
 
-// NOTE: Event listeners are broken if we hot-reload
 // TODO: OnTick is not yet called (triggerred by world manager?)
 
 
@@ -19,9 +17,8 @@ void TestbenchWorld::OnCreate()
 	RYU_PROFILE_SCOPE();
 	RYU_LOG_DEBUG("Testbench World Created");
 	using namespace Ryu;
-	using Runtime = RYU_RUNTIME();
 
-	m_inputManager = Runtime::GetInputManager();
+	m_inputManager = Engine::Engine::Get().GetInputManager();
 	
 	// Create camera
 	m_mainCamera = CreateEntity("Main Camera");
@@ -39,7 +36,7 @@ void TestbenchWorld::OnCreate()
 
 	m_inputManager->BindAction("ToggleWireframe", Ryu::Window::KeyCode::R, []()
 	{
-		Gfx::WorldRenderer* renderer = Runtime::GetRenderer()->GetWorldRenderer();
+		Gfx::WorldRenderer* renderer = Engine::Engine::Get().GetRenderer()->GetWorldRenderer();
 		
 		auto config = renderer->GetConfig();
 		config.EnableWireframe = !config.EnableWireframe;
@@ -68,7 +65,6 @@ void TestbenchWorld::OnTick(const Ryu::Utils::FrameTimer& timer)
 	using namespace Ryu;
 	using KC = Ryu::Window::KeyCode;
 
-	m_timer = timer;
 
 	t += timer.DeltaTimeF() * 1.5f;
 

@@ -63,7 +63,7 @@ option("ryu-build-with-editor")
 option_end()
 
 option("ryu-unity-build")
-    set_default(true)
+    set_default(false)
     set_showmenu(true)
     set_category("root Ryu/Build")
     set_description("Compile using unity build")

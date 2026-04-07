@@ -1,6 +1,5 @@
 #pragma once
 #include "Game/IGameModule.h"
-#include "Testbench/Game/TestbenchGameState.h"
 #include <memory>
 
 class TestbenchModule final : public Ryu::Game::IGameModule

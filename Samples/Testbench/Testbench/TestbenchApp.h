@@ -15,9 +15,6 @@ public:
 	[[nodiscard]] inline Ryu::Game::WorldManager* GetWorldManager() noexcept override { return &m_worldManager; }
 
 private:
-	void TestSerialization();
-
-private:
 	GInput                  m_gameInput;
 	Ryu::Game::WorldManager m_worldManager;
 	Ryu::Utils::FrameTimer  m_timer;

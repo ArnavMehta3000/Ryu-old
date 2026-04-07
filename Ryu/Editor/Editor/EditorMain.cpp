@@ -34,7 +34,7 @@ RYU_MAIN()
 			.GameModulePath  = CmdLine::Get().GetCVarValue("Game.ModulePath"),
 		};
 
-		auto editorApp = std::make_shared<Editor::EditorApp>(editorConfig);
+		auto editorApp = std::make_unique<Editor::EditorApp>(editorConfig);
 		Engine::Engine::Get().RunApp(editorApp.get(), editorApp->GetRendererHook());
 
 		Engine::Shutdown();

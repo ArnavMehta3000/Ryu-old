@@ -60,8 +60,3 @@ void TestbenchApp::OnTick(const Ryu::Utils::FrameTimer& timer)
 
 	m_worldManager.OnTick(timer);
 }
-
-void TestbenchApp::TestSerialization()
-{
-	// Serialization removed - no longer needed
-}

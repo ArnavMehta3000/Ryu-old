@@ -4,15 +4,15 @@
 
 namespace Ryu::Config
 {
-	GameConfig GameConfig::Load(const std::filesystem::path& configDir)
+	GameConfig GameConfig::Load(const fs::path& configDir)
 	{
-		GameConfig config;  // Start with defaults
+		GameConfig config;
 
 		const auto graphicsFile = configDir / "GraphicsSettings.toml";
 
 		try
 		{
-			if (!std::filesystem::exists(graphicsFile))
+			if (!fs::exists(graphicsFile))
 			{
 				RYU_LOG_WARN("GraphicsSettings.toml not found at '{}', using defaults", graphicsFile.string());
 				return config;

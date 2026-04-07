@@ -7,7 +7,6 @@
 #include "Core/Logging/Logger.h"
 #include "Core/Profiling/Profiling.h"
 #include "Core/Utils/Timing/Stopwatch.h"
-#include "Engine/Services/Services.h"
 #include "Game/Components/MeshRenderer.h"
 #include "Game/World/WorldManager.h"
 #include "Graphics/Compiler/ShaderCompiler.h"
@@ -56,8 +55,6 @@ namespace Ryu::Engine
 		RYU_PROFILE_SCOPE();
 		RYU_PROFILE_BOOKMARK("Engine Initialize");
 
-		ServiceLocator::Initialize();
-
 		RYU_LOG_DEBUG("Initializing Engine");
 
 		if (!DirectX::XMVerifyCPUSupport())
@@ -98,15 +95,6 @@ namespace Ryu::Engine
 		m_inputManager = std::make_unique<Game::InputManager>(
 			window->GetInput(),
 			window->GetDispatcher());
-
-		// Register services
-		ServiceLocator::Register(m_currentApp);
-		ServiceLocator::Register(&Logging::Logger::Get());
-		ServiceLocator::Register(&Config::CmdLine::Get());
-		ServiceLocator::Register(&App::PathManager::Get());
-		ServiceLocator::Register(m_renderer.get());
-		ServiceLocator::Register(m_inputManager.get());
-		ServiceLocator::Register(&Gfx::ShaderCompiler::Get());
 
 		RYU_LOG_TRACE("Engine initialization completed");
 		return true;

@@ -5,6 +5,8 @@
 
 namespace Ryu::Config
 {
+	namespace fs = std::filesystem;
+
 	struct RYU_API GameConfig
 	{
 		struct
@@ -17,6 +19,6 @@ namespace Ryu::Config
 		} Graphics;
 
 		// Loads from configDir/GraphicsSettings.toml
-		static GameConfig Load(const std::filesystem::path& configDir);
+		static GameConfig Load(const fs::path& configDir);
 	};
 }

@@ -21,7 +21,6 @@ namespace Ryu::App
 
 		static void InitWindow(Window::Window& window);
 
-		// Default implementation
 		[[nodiscard]] inline  virtual bool OnInit() override { m_isRunning = true; return true; }
 
 		[[nodiscard]] inline Window::Window* GetWindow() override { return m_window.get(); }
