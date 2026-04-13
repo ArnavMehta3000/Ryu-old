@@ -1,3 +1,5 @@
+# !!! THIS PROJECT HAS BEEN ARCHIVED!!!
+
 # Ryu Engine
 
 Ryu Engine is an experimentation playground for making game engines<br>
